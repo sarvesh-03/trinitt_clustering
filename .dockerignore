@@ -1,0 +1,8 @@
+pg_db
+.github
+.githooks
+.vscode
+.env.example
+config.example.json
+.gitignore
+.golangci.yaml
