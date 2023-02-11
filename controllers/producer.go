@@ -12,8 +12,6 @@ import (
 	"github.com/trinitt/config"
 	"github.com/trinitt/utils"
 
-	// "github.com/linkedin/goavro"
-	"encoding/json"
 )
 
 type SignupRequest struct {
@@ -71,19 +69,6 @@ type Record struct {
 	Param     []ParamType `avro:"param" json:"param"`
 }
 
-type M map[string]interface{}
-
-func conv(rec Record) map[string]interface{} {
-	m := make(map[string]interface{})
-	m["user_id"] = rec.User_id
-	m["entity_id"] = rec.Entity_id
-	var h []map[string]interface{}
-	for _, value := range rec.Param {
-		h = append(h, conv1(value))
-	}
-	m["param"] = h
-	return m
-}
 
 func SignupUser(c echo.Context) error {
 
@@ -91,46 +76,7 @@ func SignupUser(c echo.Context) error {
 	if err != nil {
 		log.Fatal("failed to write messages:", err)
 	}
-	// producer:= config.GetProducer()
-	// codec, err := goavro.NewCodec(`{
-	// 	"type": "record",
-	// 	"name": "Record",
-	// 	"fields": [
-	// 	  {
-	// 		"name": "user_id",
-	// 		"type": "string"
-	// 	  },
-	// 	  {
-	// 		"name": "entity_id",
-	// 		"type": "string"
-	// 	  },
-	// 	  {
-	// 		"name": "param",
-	// 		"type": {
-	// 		  "type": "array",
-	// 		  "items": {
-	// 			"type": "record",
-	// 			"namespace": "Record",
-	// 			"name": "param",
-	// 			"fields": [
-	// 			  {
-	// 				"name": "data_type",
-	// 				"type": "string"
-	// 			  },
-	// 			  {
-	// 				"name": "value",
-	// 				"type": "string"
-	// 			  }
-	// 			]
-	// 		  }
-	// 		}
-	// 	  }
-	// 	]
-	//   }`)
-	//     if err != nil {
-	//         fmt.Println(err)
-	//     }
-
+	
 	fmt.Println(schema)
 	in := Record{
 
@@ -158,12 +104,11 @@ func SignupUser(c echo.Context) error {
 	}
 
 	fmt.Printf("%+v\n", data)
-	topic := "qwerty"
-	jso, err := json.Marshal(in)
+	topic := "myTopic"
 
 	config.GetProducer().Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: 0},
-		Value:          jso,
+		Value:          data,
 	}, nil)
 
 	out := Record{}
