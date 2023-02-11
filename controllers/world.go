@@ -106,6 +106,8 @@ func Setup(record Record) {
 	point := &dbscan.NamedPoint{Name: numberOfPointsInString, Point: []float64{float64(x), float64(y)}}
 
 	ourWorld.Points = append(ourWorld.Points, point)
+
+	World[uint(userId)] = ourWorld
 }
 
 func GetClustersForUser(userId uint) [][]dbscan.ClusterablePoint {
@@ -128,16 +130,21 @@ func TestSetup() {
 
 	InitUserInWorld(1)
 
-	for i := 0; i < 100; i++ {
-		intValueString := strconv.Itoa(rand.Intn(1000))
-		Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: RandomString(rand.Intn(30))}, {Data_type: "INT", Value: intValueString}}})
-	}
+	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "aaaaa"}, {Data_type: "INT", Value: "5"}}})
+	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "bbbbb"}, {Data_type: "INT", Value: "3"}}})
+	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "ccccc"}, {Data_type: "INT", Value: "3"}}})
+	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "ddddd"}, {Data_type: "INT", Value: "99"}}})
+	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "eeeee"}, {Data_type: "INT", Value: "100"}}})
+	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "fffff"}, {Data_type: "INT", Value: "101"}}})
 
-	ourWorld := World[1]
+	clusters := GetClustersForUser(1)
 
 	// Print points
-	for _, point := range ourWorld.Points {
-		fmt.Println(point)
+	for _, cluster := range clusters {
+		fmt.Println("Cluster:")
+		for _, point := range cluster {
+			fmt.Println(point.(*dbscan.NamedPoint).Name)
+		}
 	}
 
 }
