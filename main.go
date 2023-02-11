@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -18,8 +17,8 @@ func main() {
 
 	config.ConnectDB()
 	models.MigrateDB()
-	config.CreateProducer()
-	config.ConfigSchemaRegister()
+	//config.CreateProducer()
+	//config.ConfigSchemaRegister()
 	server := echo.New()
 	utils.InitLogger(server)
 	server.Use(middleware.CORS())

@@ -17,17 +17,16 @@ type CreateEntityResponse struct {
 	ID   uint   `json:"id"`
 }
 
-func CreateEntity(c echo.Context) {
+func CreateEntity(c echo.Context) error {
 	var req CreateEntityRequest
 
 	if err := c.Bind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
+		return c.JSON(http.StatusBadRequest, "Error-1")
 	}
 
 	db := config.GetDB()
 
-	userId := c.Get("user").(uint)
+	userId := uint(1)
 
 	entity := models.Entity{
 		Name:        req.Name,
@@ -35,8 +34,8 @@ func CreateEntity(c echo.Context) {
 	}
 
 	if err := db.Create(&entity).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
+		return c.JSON(http.StatusInternalServerError, "Error-2")
+
 	}
 
 	var response CreateEntityResponse
@@ -44,5 +43,5 @@ func CreateEntity(c echo.Context) {
 	response.Name = entity.Name
 	response.ID = entity.ID
 
-	c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }

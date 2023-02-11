@@ -18,5 +18,5 @@ type Parameter struct {
 
 	// Relations
 	EntityID uint   `gorm:"required"`
-	Entity   Entity `gorm:"foreignKey:CreatedByID"`
+	Entity   Entity `gorm:"foreignKey:EntityID; references:ID; constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

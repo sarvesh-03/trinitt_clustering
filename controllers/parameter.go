@@ -29,7 +29,7 @@ func AddParamToEntity(c echo.Context) error {
 
 	db := config.GetDB()
 
-	userId := c.Get("user").(uint)
+	userId := uint(1)
 
 	var entity models.Entity
 

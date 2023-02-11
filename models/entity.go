@@ -11,5 +11,5 @@ type Entity struct {
 
 	// Relations
 	CreatedByID uint `gorm:"required"`
-	CreatedBy   User `gorm:"foreignKey:CreatedByID"`
+	CreatedBy   User `gorm:"foreignKey:CreatedByID;"`
 }

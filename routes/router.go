@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/trinitt/controllers"
 	"github.com/trinitt/sockets"
 )
 
@@ -76,5 +77,9 @@ func Init(e *echo.Echo) {
 
 		return c.JSON(200, "OK")
 	})
+
+	api.POST("/entity/create", controllers.CreateEntity)
+	api.POST("/parameter/create", controllers.AddParamToEntity)
+	api.POST("/data/add", controllers.AddData)
 
 }
