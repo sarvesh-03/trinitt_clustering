@@ -12,7 +12,8 @@ import (
 func main() {
 
 	config.InitConfig()
-
+	config.CreateProducer()
+	config.CreateConsumer()
 	server := echo.New()
 	utils.InitLogger(server)
 	server.Use(middleware.CORS())

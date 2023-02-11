@@ -11,8 +11,6 @@ import (
 	"github.com/trinitt/config"
 	"github.com/trinitt/utils"
 	"github.com/hamba/avro/v2"
-	// "github.com/linkedin/goavro"
-	"encoding/json"
 )
 
 type SignupRequest struct {
@@ -29,11 +27,11 @@ var Schema = `{
 	"fields": [
 	  {
 		"name": "user_id",
-		"type": "string"
+		"type": "int"
 	  },
 	  {
 		"name": "entity_id",
-		"type": "string"
+		"type": "int"
 	  },
 	  {
 		"name": "param",
@@ -65,8 +63,8 @@ type record struct{
 }
 
 type Record struct {
-	User_id string  `avro:"user_id" json:"user_id"`
-	Entity_id string `avro:"entity_id" json:"entity_id"`
+	User_id int  `avro:"user_id" json:"user_id"`
+	Entity_id  int`avro:"entity_id" json:"entity_id"`
 	Param []record `avro:"param" json:"param"`
 }
 
@@ -96,54 +94,15 @@ func SignupUser(c echo.Context) error {
 	if err != nil {
 		log.Fatal("failed to write messages:", err)
 	}
-	// producer:= config.GetProducer()
-	// codec, err := goavro.NewCodec(`{
-	// 	"type": "record",
-	// 	"name": "Record",
-	// 	"fields": [
-	// 	  {
-	// 		"name": "user_id",
-	// 		"type": "string"
-	// 	  },
-	// 	  {
-	// 		"name": "entity_id",
-	// 		"type": "string"
-	// 	  },
-	// 	  {
-	// 		"name": "param",
-	// 		"type": {
-	// 		  "type": "array",
-	// 		  "items": {
-	// 			"type": "record",
-	// 			"namespace": "Record",
-	// 			"name": "param",
-	// 			"fields": [
-	// 			  {
-	// 				"name": "data_type",
-	// 				"type": "string"
-	// 			  },
-	// 			  {
-	// 				"name": "value",
-	// 				"type": "string"
-	// 			  }
-	// 			]
-	// 		  }
-	// 		}
-	// 	  }
-	// 	]
-	//   }`)
-    //     if err != nil {
-    //         fmt.Println(err)
-    //     }
 
 
 
 
-	fmt.Println(schema)
+
 	in := Record{	
 	
-		User_id: "1",
-		Entity_id: "1",
+		User_id: 1,
+		Entity_id: 1,
 		Param: []record{
 			{
 				Data_type: "INT",
@@ -156,10 +115,6 @@ func SignupUser(c echo.Context) error {
 		},
 
 	}
-	// binary, err := codec.BinaryFromNative(nil, conv(in))
-    //     if err != nil {
-    //         fmt.Println(err)
-    //     }
 
 	data, err := avro.Marshal(schema, in)
 	if err != nil {
@@ -169,14 +124,14 @@ func SignupUser(c echo.Context) error {
 
 
 	fmt.Printf("%+v\n", data)
-	topic:="qwerty"
-	jso,err := json.Marshal(in)
+	topic:="myTopic"
 
 	config.GetProducer().Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: 0},
-		Value:         jso ,
+		Value:         data,
 	}, nil)
-
+    
+	
 	out := Record{}
 	err = avro.Unmarshal(schema, data, &out)
 	if err != nil {
