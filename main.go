@@ -1,8 +1,10 @@
 package main
 
 import (
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
 	"github.com/trinitt/config"
 	"github.com/trinitt/models"
 	"github.com/trinitt/routes"
@@ -16,11 +18,11 @@ func main() {
 
 	config.ConnectDB()
 	models.MigrateDB()
-
+	config.CreateProducer()
+	config.ConfigSchemaRegister()
 	server := echo.New()
 	utils.InitLogger(server)
 	server.Use(middleware.CORS())
-
 	routes.Init(server)
 
 	hub := sockets.NewHub()
