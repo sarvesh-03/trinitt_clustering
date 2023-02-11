@@ -2,22 +2,15 @@ package controllers
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"time"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/labstack/echo/v4"
-	// "github.com/confluentinc/confluent-kafka-go/kafka"
+	"bitbucket.org/sjbog/go-dbscan"
 	"github.com/hamba/avro/v2"
 	"github.com/trinitt/config"
-	"github.com/trinitt/utils"
 )
 
 
-
-
-func Consume(c echo.Context) error {
+func Consume(){
 	schema, _ := avro.Parse(Schema)
 	
 	go func(){
@@ -27,15 +20,24 @@ func Consume(c echo.Context) error {
 		if err == nil {
 			fmt.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
 			out := Record{}
-			err = avro.Unmarshal(schema, msg.Value, &out)
-			if err != nil {
-				log.Fatal(err)
-			}
+			avro.Unmarshal(schema, msg.Value, &out)
 			fmt.Println(out)
-		} else  if err.(kafka.Error).Code().String()!=kafka.ErrMsgTimedOut.String(){
-			fmt.Println(msg)
+			PostConsume(out)
+		} else {
+			println(err)
 		}
 	}
 	}()
-	return utils.SendResponse(c, http.StatusOK, "User created successfully")
+}
+
+func PostConsume(rec Record){
+	Setup(rec)
+	clusters:=GetClustersForUser(1)
+	for _, cluster := range clusters {
+		fmt.Println("Cluster:")
+		for _, point := range cluster {
+			fmt.Println(point.(*dbscan.NamedPoint).Name)
+		}
+	}
+	Produce();
 }

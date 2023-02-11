@@ -13,6 +13,7 @@ type Information struct {
 	Points     []dbscan.ClusterablePoint
 	BaseString string
 	BaseNumber float64
+	Entity_id int
 }
 
 var World map[uint]Information = make(map[uint]Information)
@@ -48,18 +49,14 @@ func AddPointToUser(userId uint, point dbscan.ClusterablePoint) {
 }
 
 func Setup(record Record) {
-	userId, err := strconv.ParseUint(record.User_id, 10, 64)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
+	userId:= record.User_id
 	ourWorld := World[uint(userId)]
 
 	var x int
 	var y int
+	var err error
 
-	if record.Param[0].Data_type == "STRING" {
+	if record.Param[0].Data_type == "string" {
 		if ourWorld.BaseString == "" {
 			ourWorld.BaseString = record.Param[0].Value
 		}
@@ -79,7 +76,7 @@ func Setup(record Record) {
 		}
 	}
 
-	if record.Param[1].Data_type == "STRING" {
+	if record.Param[1].Data_type == "string" {
 		if ourWorld.BaseString == "" {
 			ourWorld.BaseString = record.Param[1].Value
 		}
@@ -125,26 +122,11 @@ func RandomString(n int) string {
 	return string(s)
 }
 
-func TestSetup() {
+func InitSetup() {
 	World = make(map[uint]Information)
 
 	InitUserInWorld(1)
 
-	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "aaaaa"}, {Data_type: "INT", Value: "5"}}})
-	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "bbbbb"}, {Data_type: "INT", Value: "3"}}})
-	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "ccccc"}, {Data_type: "INT", Value: "3"}}})
-	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "ddddd"}, {Data_type: "INT", Value: "99"}}})
-	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "eeeee"}, {Data_type: "INT", Value: "100"}}})
-	Setup(Record{User_id: "1", Param: []ParamType{{Data_type: "STRING", Value: "fffff"}, {Data_type: "INT", Value: "101"}}})
-
-	clusters := GetClustersForUser(1)
-
-	// Print points
-	for _, cluster := range clusters {
-		fmt.Println("Cluster:")
-		for _, point := range cluster {
-			fmt.Println(point.(*dbscan.NamedPoint).Name)
-		}
-	}
+	GetClustersForUser(1)
 
 }

@@ -3,15 +3,11 @@ package controllers
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/labstack/echo/v4"
 
 	"github.com/hamba/avro/v2"
 	"github.com/trinitt/config"
-	"github.com/trinitt/utils"
-
 )
 
 type SignupRequest struct {
@@ -64,13 +60,13 @@ type ParamType struct {
 }
 
 type Record struct {
-	User_id   string      `avro:"user_id" json:"user_id"`
-	Entity_id string      `avro:"entity_id" json:"entity_id"`
+	User_id   int      `avro:"user_id" json:"user_id"`
+	Entity_id int      `avro:"entity_id" json:"entity_id"`
 	Param     []ParamType `avro:"param" json:"param"`
 }
 
 
-func SignupUser(c echo.Context) error {
+func Produce(){
 
 	schema, err := avro.Parse(Schema)
 	if err != nil {
@@ -80,8 +76,8 @@ func SignupUser(c echo.Context) error {
 	fmt.Println(schema)
 	in := Record{
 
-		User_id:   "1",
-		Entity_id: "1",
+		User_id:   1,
+		Entity_id: 1,
 		Param: []ParamType{
 			{
 				Data_type: "INT",
@@ -93,10 +89,6 @@ func SignupUser(c echo.Context) error {
 			},
 		},
 	}
-	// binary, err := codec.BinaryFromNative(nil, conv(in))
-	//     if err != nil {
-	//         fmt.Println(err)
-	//     }
 
 	data, err := avro.Marshal(schema, in)
 	if err != nil {
@@ -104,7 +96,7 @@ func SignupUser(c echo.Context) error {
 	}
 
 	fmt.Printf("%+v\n", data)
-	topic := "myTopic"
+	topic := "yTopic"
 
 	config.GetProducer().Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: 0},
@@ -118,5 +110,5 @@ func SignupUser(c echo.Context) error {
 	}
 	fmt.Println(out.Entity_id)
 
-	return utils.SendResponse(c, http.StatusOK, "User created successfully")
 }
+
