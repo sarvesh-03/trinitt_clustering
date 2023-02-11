@@ -8,9 +8,12 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/labstack/echo/v4"
 
+	"github.com/hamba/avro/v2"
 	"github.com/trinitt/config"
 	"github.com/trinitt/utils"
-	"github.com/hamba/avro/v2"
+
+	// "github.com/linkedin/goavro"
+	"encoding/json"
 )
 
 type SignupRequest struct {
@@ -57,33 +60,27 @@ var Schema = `{
 	]
   }`
 
-type record struct{
+type ParamType struct {
 	Data_type string `avro:"data_type" json:"data_type"`
-	Value string `avro:"value" json:"value"`
+	Value     string `avro:"value" json:"value"`
 }
 
 type Record struct {
-	User_id int  `avro:"user_id" json:"user_id"`
-	Entity_id  int`avro:"entity_id" json:"entity_id"`
-	Param []record `avro:"param" json:"param"`
+	User_id   string      `avro:"user_id" json:"user_id"`
+	Entity_id string      `avro:"entity_id" json:"entity_id"`
+	Param     []ParamType `avro:"param" json:"param"`
 }
 
-
-func conv1(rec record) map[string]interface{}{
-	m := make(map[string]interface{})
-	m["data_type"] = rec.Data_type
-	m["value"] = rec.Value
-	return m
-}
 type M map[string]interface{}
-func conv(rec Record) map[string]interface{}{
+
+func conv(rec Record) map[string]interface{} {
 	m := make(map[string]interface{})
 	m["user_id"] = rec.User_id
 	m["entity_id"] = rec.Entity_id
-	var h [] map[string]interface{}
+	var h []map[string]interface{}
 	for _, value := range rec.Param {
-        h =append(h, conv1(value))
-    }
+		h = append(h, conv1(value))
+	}
 	m["param"] = h
 	return m
 }
@@ -94,50 +91,87 @@ func SignupUser(c echo.Context) error {
 	if err != nil {
 		log.Fatal("failed to write messages:", err)
 	}
+	// producer:= config.GetProducer()
+	// codec, err := goavro.NewCodec(`{
+	// 	"type": "record",
+	// 	"name": "Record",
+	// 	"fields": [
+	// 	  {
+	// 		"name": "user_id",
+	// 		"type": "string"
+	// 	  },
+	// 	  {
+	// 		"name": "entity_id",
+	// 		"type": "string"
+	// 	  },
+	// 	  {
+	// 		"name": "param",
+	// 		"type": {
+	// 		  "type": "array",
+	// 		  "items": {
+	// 			"type": "record",
+	// 			"namespace": "Record",
+	// 			"name": "param",
+	// 			"fields": [
+	// 			  {
+	// 				"name": "data_type",
+	// 				"type": "string"
+	// 			  },
+	// 			  {
+	// 				"name": "value",
+	// 				"type": "string"
+	// 			  }
+	// 			]
+	// 		  }
+	// 		}
+	// 	  }
+	// 	]
+	//   }`)
+	//     if err != nil {
+	//         fmt.Println(err)
+	//     }
 
+	fmt.Println(schema)
+	in := Record{
 
-
-
-
-	in := Record{	
-	
-		User_id: 1,
-		Entity_id: 1,
-		Param: []record{
+		User_id:   "1",
+		Entity_id: "1",
+		Param: []ParamType{
 			{
 				Data_type: "INT",
-				Value: "5",
+				Value:     "5",
 			},
 			{
 				Data_type: "string",
-				Value: "hello",
+				Value:     "hello",
 			},
 		},
-
 	}
+	// binary, err := codec.BinaryFromNative(nil, conv(in))
+	//     if err != nil {
+	//         fmt.Println(err)
+	//     }
 
 	data, err := avro.Marshal(schema, in)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-
-
 	fmt.Printf("%+v\n", data)
-	topic:="myTopic"
+	topic := "qwerty"
+	jso, err := json.Marshal(in)
 
 	config.GetProducer().Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: 0},
-		Value:         data,
+		Value:          jso,
 	}, nil)
-    
-	
+
 	out := Record{}
 	err = avro.Unmarshal(schema, data, &out)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(out.Entity_id)
-    
+
 	return utils.SendResponse(c, http.StatusOK, "User created successfully")
 }
