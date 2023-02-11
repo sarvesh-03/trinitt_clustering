@@ -9,6 +9,5 @@ import (
 func UserRoutes(e *echo.Group) {
 	user := e.Group("/user")
 	
-	user.POST("/signup", controllers.RegisterUser)
-	user.POST("/login", controllers.LoginUser)
+	user.GET("/kafka", controllers.SignupUser)
 }

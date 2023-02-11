@@ -2,8 +2,8 @@ version: '3.9'
 
 services:
   trinitt_backend:
-    container_name: "trinitt_backend"
-    image: "trinitt_backend"
+    container_name: "trinitt_cluster"
+    image: "trinitt_cluster"
     build:
       context: .
       target: ${TARGET}
@@ -11,25 +11,3 @@ services:
       - ${SERVER_PORT}:${SERVER_PORT} 
     volumes:
       - .:/app  
-
-  trinitt_db:
-    container_name: "trinitt_db"
-    image: postgres
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - pg_db:/data/postgres
-
-  trinitt_adminer:
-    container_name: "trinitt_adminer"
-    image: adminer
-    restart: always
-    environment:
-      ADMINER_DESIGN: pappu687
-    ports:
-      - ${ADMINER_PORT}:8080
-
-volumes:
-  pg_db:
-    external: false
