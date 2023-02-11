@@ -39,5 +39,5 @@ func PostConsume(rec Record){
 			fmt.Println(point.(*dbscan.NamedPoint).Name)
 		}
 	}
-	Produce();
+	Produce(clusters);
 }

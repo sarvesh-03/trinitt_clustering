@@ -3,14 +3,6 @@
   "name": "Record",
   "fields": [
     {
-      "name": "user_id",
-      "type": "long"
-    },
-    {
-      "name": "entity_id",
-      "type": "long"
-    },
-    {
       "name": "param",
       "type": {
         "type": "array",
@@ -20,13 +12,17 @@
           "name": "param",
           "fields": [
             {
-              "name": "data_type",
-              "type": "string"
-            },
-            {
-              "name": "value",
-              "type": "string"
-            }
+          "name": "x",
+          "type": "float"
+          },
+          {
+          "name": "y",
+          "type": "float"
+          },
+          {
+          "name": "cluster",
+          "type": "int"
+          }
           ]
         }
       }
