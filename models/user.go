@@ -1,10 +1,11 @@
 package models
 
-// import (
-// 	"gorm.io/gorm"
-// )
+import (
+	"gorm.io/gorm"
+)
 
-// type User struct {
-// 	gorm.Model
-// 	name    string `gorm:"default:null;"`
-// }
+type User struct {
+	gorm.Model
+	Email    string `gorm:"uniqueIndex"`
+	Password string
+}
