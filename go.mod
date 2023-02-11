@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/fatih/color v1.13.0
 	github.com/golang-jwt/jwt/v4 v4.4.3
-	github.com/hamba/avro v1.8.0
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/riferrei/srclient v0.5.4
@@ -13,14 +12,21 @@ require (
 	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
 )
 
-require golang.org/x/crypto v0.6.0 // indirect
+require (
+	github.com/linkedin/goavro v2.1.0+incompatible // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
+)
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/websocket v1.5.0
 )
 
-require github.com/confluentinc/confluent-kafka-go v1.9.2
+require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2
+	github.com/hamba/avro/v2 v2.5.0
+)
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect

@@ -1,0 +1,35 @@
+{
+  "type": "record",
+  "name": "Record",
+  "fields": [
+    {
+      "name": "user_id",
+      "type": "long"
+    },
+    {
+      "name": "entity_id",
+      "type": "long"
+    },
+    {
+      "name": "param",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "namespace": "Record",
+          "name": "param",
+          "fields": [
+            {
+              "name": "data_type",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

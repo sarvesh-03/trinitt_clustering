@@ -3,15 +3,16 @@ package controllers
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/hamba/avro"
 	"github.com/labstack/echo/v4"
 
 	"github.com/trinitt/config"
 	"github.com/trinitt/utils"
+	"github.com/hamba/avro/v2"
+	// "github.com/linkedin/goavro"
+	"encoding/json"
 )
 
 type SignupRequest struct {
@@ -24,19 +25,70 @@ type SignupRequest struct {
 
 var Schema = `{
 	"type": "record",
-	"name": "simple",
-	"namespace": "org.hamba.avro",
-	"fields" : [
-		{"name": "a", "type": "long"},
-		{"name": "b", "type": "string"}
+	"name": "Record",
+	"fields": [
+	  {
+		"name": "user_id",
+		"type": "string"
+	  },
+	  {
+		"name": "entity_id",
+		"type": "string"
+	  },
+	  {
+		"name": "param",
+		"type": {
+		  "type": "array",
+		  "items": {
+			"type": "record",
+			"namespace": "Record",
+			"name": "param",
+			"fields": [
+			  {
+				"name": "data_type",
+				"type": "string"
+			  },
+			  {
+				"name": "value",
+				"type": "string"
+			  }
+			]
+		  }
+		}
+	  }
 	]
-}`
+  }`
 
-type SimpleRecord struct {
-	A int64  `avro:"a"`
-	B string `avro:"b"`
+type record struct{
+	Data_type string `avro:"data_type" json:"data_type"`
+	Value string `avro:"value" json:"value"`
 }
 
+type Record struct {
+	User_id string  `avro:"user_id" json:"user_id"`
+	Entity_id string `avro:"entity_id" json:"entity_id"`
+	Param []record `avro:"param" json:"param"`
+}
+
+
+func conv1(rec record) map[string]interface{}{
+	m := make(map[string]interface{})
+	m["data_type"] = rec.Data_type
+	m["value"] = rec.Value
+	return m
+}
+type M map[string]interface{}
+func conv(rec Record) map[string]interface{}{
+	m := make(map[string]interface{})
+	m["user_id"] = rec.User_id
+	m["entity_id"] = rec.Entity_id
+	var h [] map[string]interface{}
+	for _, value := range rec.Param {
+        h =append(h, conv1(value))
+    }
+	m["param"] = h
+	return m
+}
 
 func SignupUser(c echo.Context) error {
 
@@ -45,48 +97,92 @@ func SignupUser(c echo.Context) error {
 		log.Fatal("failed to write messages:", err)
 	}
 	// producer:= config.GetProducer()
+	// codec, err := goavro.NewCodec(`{
+	// 	"type": "record",
+	// 	"name": "Record",
+	// 	"fields": [
+	// 	  {
+	// 		"name": "user_id",
+	// 		"type": "string"
+	// 	  },
+	// 	  {
+	// 		"name": "entity_id",
+	// 		"type": "string"
+	// 	  },
+	// 	  {
+	// 		"name": "param",
+	// 		"type": {
+	// 		  "type": "array",
+	// 		  "items": {
+	// 			"type": "record",
+	// 			"namespace": "Record",
+	// 			"name": "param",
+	// 			"fields": [
+	// 			  {
+	// 				"name": "data_type",
+	// 				"type": "string"
+	// 			  },
+	// 			  {
+	// 				"name": "value",
+	// 				"type": "string"
+	// 			  }
+	// 			]
+	// 		  }
+	// 		}
+	// 	  }
+	// 	]
+	//   }`)
+    //     if err != nil {
+    //         fmt.Println(err)
+    //     }
+
+
+
+
+	fmt.Println(schema)
+	in := Record{	
 	
-	in := SimpleRecord{A: 27, B: "foo"}
+		User_id: "1",
+		Entity_id: "1",
+		Param: []record{
+			{
+				Data_type: "INT",
+				Value: "5",
+			},
+			{
+				Data_type: "string",
+				Value: "hello",
+			},
+		},
+
+	}
+	// binary, err := codec.BinaryFromNative(nil, conv(in))
+    //     if err != nil {
+    //         fmt.Println(err)
+    //     }
 
 	data, err := avro.Marshal(schema, in)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+
+
 	fmt.Printf("%+v\n", data)
-
-	users := [...]string{"eabara", "jsmith", "sgarcia", "jbernard", "htanaka", "awalther"}
-    items := [...]string{"book", "alarm clock", "t-shirts", "gift card", "batteries"}
 	topic:="qwerty"
+	jso,err := json.Marshal(in)
 
-    for n := 0; n < 10; n++ {
-        key := users[rand.Intn(len(users))]
-        data := items[rand.Intn(len(items))]
-        config.GetProducer().Produce(&kafka.Message{
-            TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-            Key:            []byte(key),
-            Value:          []byte(data),
-        }, nil)
-    }
+	config.GetProducer().Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: 0},
+		Value:         jso ,
+	}, nil)
 
-
-
-	// Writing OCF data
-	
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// // if err := producer.Close(); err != nil {
-	// // 	log.Fatal("failed to close writer:", err)
-	// // }
-	// fmt.Println(ocfFileContents.String())
-	// producer.SetWriteDeadline(time.Now().Add(10*time.Second))
-	// _, err = producer.WriteMessages(
-	// 	kafka.Message{Value: data},
-	// )
-	// if err != nil {
-	// 	log.Fatal("failed to write messages:", err)
-	// }
-
+	out := Record{}
+	err = avro.Unmarshal(schema, data, &out)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(out.Entity_id)
+    
 	return utils.SendResponse(c, http.StatusOK, "User created successfully")
 }
