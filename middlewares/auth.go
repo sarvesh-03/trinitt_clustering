@@ -1,31 +1,35 @@
 package middleware
 
-// func Auth(echo.HandlerFunc) echo.HandlerFunc {
+import (
+	"strings"
 
-// 	authHeader := c.Request.Header.Get("Authorization")
+	"github.com/labstack/echo/v4"
+	"github.com/trinitt/utils"
+)
 
-// 	if authHeader == "" {
-// 		utils.SendResponse(c, http.StatusUnauthorized, "Authorization header not found")
-// 		return
-// 	}
+func Auth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		authHeader := c.Request().Header.Get("Authorization")
 
-// 	userID, err := utils.ValidateToken(authHeader)
-// 	if err != nil {
-// 		utils.SendResponse(c, http.StatusUnauthorized, "Unauthorized")
-// 		return
-// 	}
+		if authHeader == "" {
 
-// 	// if admin userID
-// 	if userID == 0 {
-// 		utils.SendResponse(c, http.StatusUnauthorized, "Unauthorized")
-// 		return
-// 	}
+			return c.String(401, "Unauthorized")
+		}
 
-// 	c.Set("userID", userID)
-// 	c.Next()
+		if len(authHeader) < 7 || !strings.HasPrefix(authHeader, "Bearer ") {
+			return c.String(401, "Unauthorized")
+		}
 
-// 	return func(c echo.Context) error {
-// 		return next(c)
-// 	}
+		token := authHeader[7:]
 
-// }
+		userId, err := utils.ValidateToken(token)
+
+		if err != nil {
+			return c.String(401, "Unauthorized")
+		}
+
+		c.Set("userId", userId)
+
+		return next(c)
+	}
+}
