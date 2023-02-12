@@ -13,7 +13,7 @@ type Information struct {
 	Points     []dbscan.ClusterablePoint
 	BaseString string
 	BaseNumber float64
-	Entity_id int
+	Entity_id  int
 }
 
 var World map[uint]Information = make(map[uint]Information)
@@ -49,7 +49,7 @@ func AddPointToUser(userId uint, point dbscan.ClusterablePoint) {
 }
 
 func Setup(record Record) {
-	userId:= record.User_id
+	userId := record.User_id
 	ourWorld := World[uint(userId)]
 
 	var x int
